@@ -9,8 +9,11 @@ swi_CpuSet:
     beq .swi_CpuSet_done
 
     @ r2 = fn table index, bit0=fill, bit1=32-bit
-    @ TODO: mask out unused bits to make sure this doesn't break?
+    @ Only bits 24 and 26 mean anything; games leave others set (Street
+    @ Fighter Alpha 3 passes bit 31), which would index past the table.
+    @ AND without S keeps the carry (bit 24) for the ORRCS.
     lsrs r2, r2, #25
+    and r2, r2, #2
     orrcs r2, r2, #1
     adr r4, .fn_table
     ldr pc, [r4, r2, lsl #2]
