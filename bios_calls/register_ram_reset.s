@@ -138,7 +138,15 @@ swi_RegisterRamReset:
         @ POSTFLG and HALTCNT are not written to (would otherwise freeze up the GBA)
         b .register_ram_other_IO_return
         
-    .register_ram_reset_return:    
+    .register_ram_reset_return:
+        @ whatever the flags, the official BIOS leaves the screen in forced
+        @ blank (DISPCNT = 0x0080, GBATEK). Drill Dozer queues its display
+        @ register writes for its VBlank handler unless forced blank is on,
+        @ including the one that enables that VBlank interrupt, so with
+        @ DISPCNT = 0 it waited forever.
+        mov r1, #0x04000000
+        mov r2, #0x80
+        strh r2, [r1]
         ldmfd sp!, { r1-r4, r11, r12, lr }
         bx lr
     
